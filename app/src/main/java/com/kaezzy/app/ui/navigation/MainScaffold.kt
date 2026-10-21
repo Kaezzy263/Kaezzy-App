@@ -1,5 +1,8 @@
 package com.kaezzy.app.ui.navigation
 
+import android.app.Activity
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -150,6 +154,27 @@ fun MainScaffold() {
     var moreSubRoute by remember { mutableStateOf(MoreSubRoute.HUB) }
     var activeSkill by remember { mutableStateOf<SkillEntity?>(null) }
     var showQuickAddSheet by remember { mutableStateOf(false) }
+    var backPressedTime by remember { mutableLongStateOf(0L) }
+
+    BackHandler(enabled = true) {
+        if (showQuickAddSheet) {
+            showQuickAddSheet = false
+        } else if (currentTab == MainTab.MORE && moreSubRoute == MoreSubRoute.SKILL_DETAIL) {
+            moreSubRoute = MoreSubRoute.SKILLS
+        } else if (currentTab == MainTab.MORE && moreSubRoute != MoreSubRoute.HUB) {
+            moreSubRoute = MoreSubRoute.HUB
+        } else if (currentTab != MainTab.HOME) {
+            currentTab = MainTab.HOME
+        } else {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - backPressedTime < 2000) {
+                (context as? Activity)?.finish()
+            } else {
+                Toast.makeText(context, "Tekan sekali lagi untuk keluar, brok!", Toast.LENGTH_SHORT).show()
+                backPressedTime = currentTime
+            }
+        }
+    }
 
     val items = listOf(
         BottomNavItem.Home,
